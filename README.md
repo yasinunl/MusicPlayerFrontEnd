@@ -1,70 +1,58 @@
-# Getting Started with Create React App
+# Spring Boot Music Player with Real-time Social Functionality
+This project implements a music player application with social features using Spring Boot for the backend and React with websockets for the frontend. It allows users to:
+- Login with email and password
+- Potentially share music playback control (only one user can play at a time per account)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Technology Stack:
+- Backend: Spring Boot
+- Frontend: React
+- Websockets: React Stomp Hooks (Frontend) and Spring Boot Websocket (Backend)
+## Key Features:
+- User login/authentication
+- Real-time communication between clients using websockets
+- Potential social music playback control
+## Current Functionality:
+- Users can login with email and password.
+- If two clients connect with the same account, only one can play music at a time. When one client starts playing, the other client's music is stopped.
+## Screenshots:
+- #### When two client try to play at the same time with same account:
+![alt text](image-2.png)
+![alt text](image-1.png)
 
-## Available Scripts
+## Spring Boot Websocket Controller:
+```java 
+@Autowired
+    private SimpMessagingTemplate messagingTemplate;
+    private final Map<String, String> playbackSessions = new HashMap<>();
+    @MessageMapping("/play")
+    public void play(@Payload String message, @Header("sessionID") String sessionId) {
+        synchronized (playbackSessions) {
+            String previousSessionId = playbackSessions.get(message);
+            if (previousSessionId != null) {
+                messagingTemplate.convertAndSend("/queue/reply-" + previousSessionId,
+                        "paused");
+                messagingTemplate.convertAndSend("/queue/reply-" + sessionId,
+                        "paused message");
+                playbackSessions.remove(message);
+            }
+            playbackSessions.put(message, sessionId);
+        }
+        messagingTemplate.convertAndSend("/queue/reply-" + sessionId,
+                "played");
+    }
+    @MessageMapping("/pause")
+    public void pause(@Payload String message, @Header("sessionID") String sessionId) {
+        playbackSessions.remove(message);
+    }
+```
 
-In the project directory, you can run:
+## Getting Started:
+1. Clone the repository: ```git clone https://github.com/yasinunl/musicplatformapi.git```
+1. Run the Spring Boot application
+1. Add a new user with Postman
+1. Start the React development server 
+1. Access the application in your web browser (http://localhost:3000).
 
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Additional Note
+- Please check the Music Platform API
+- Check App.js and MusicPlayer.js
