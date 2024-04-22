@@ -15,10 +15,11 @@ const MusicPlayer = ({ songs, currentSongIndex, onPrevious, onNext, user }) => {
     const [alertMessage, setAlertMessage] = useState("");
     const [alertType, setAlertType] = useState("");
 
+    // Getting message, which came from server
     useSubscription('/queue/reply-' + sessionID, (message) => { setMessage(message.body) });
     useEffect(() => {
-        if (message === "paused") {
-            audioRef.current.audio.current.pause();
+        if (message === "paused") { // If someone plays music with same email, it is going to turn "paused"
+            audioRef.current.audio.current.pause(); // Stop music player
             setAlertType("error");
             setAlertMessage("Music is stopped. Someone is playing at the same time");
         }
@@ -38,9 +39,12 @@ const MusicPlayer = ({ songs, currentSongIndex, onPrevious, onNext, user }) => {
                 ref={audioRef}
                 src={songs[currentSongIndex].audioSrc}
                 onPlay={() => {
+                    // Send message for playing
+                    // We are sending user email on message
                     stompClient.publish({ destination: '/app/play', body: user, headers: { "sessionID": sessionID } })
                 }}
                 onPause={() => {
+                    // Send message for pausing
                     stompClient.publish({ destination: '/app/pause', body: user, headers: { "sessionID": sessionID } })
                 }}
             />

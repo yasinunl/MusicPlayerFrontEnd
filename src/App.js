@@ -8,7 +8,7 @@ import {
   StompSessionProvider,
 } from "react-stomp-hooks";
 
-const songs = [
+const songs = [// A simply list of music
   { title: 'Song 1', audioSrc: 'musics/song1.mp3', coverArt: 'https://picsum.photos/400/600' },
   { title: 'Song 2', audioSrc: 'musics/song2.mp3', coverArt: 'https://picsum.photos/400/599' },
   { title: 'Song 3', audioSrc: 'musics/song3.mp3', coverArt: 'https://picsum.photos/400/598' },
@@ -66,7 +66,7 @@ function App() {
     setCurrentSongIndex(newIndex);
   };
   useEffect(() => {
-    function makeid(length) {
+    const makeid = (length) => { // A method to create random string value
       let result = '';
       const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
       const charactersLength = characters.length;
@@ -77,8 +77,9 @@ function App() {
       }
       return result;
     }
-    const sessionID = makeid(10)
-    localStorage.setItem("sessionID", sessionID)
+    const sessionID = makeid(10) // Create new session id
+    // It's going to be used for WebSocket. You can check MusicPlayer.js, line 18
+    localStorage.setItem("sessionID", sessionID) // Save the session 
   }, [])
   return (<>
     <div className="music-app">
